@@ -236,26 +236,28 @@
 </div>
 
 <script>
+// `shown` = word-relative indexes (0-based) whose cipher number is visible as a starter hint.
+// Pattern mirrors the original Karel puzzle's hint density.
 const puzzle = [
-  { label: "A", word: "TEC",           hint: "Lijmt de Waalse Lijn" },
-  { label: "B", word: "TAXUS",         hint: "Belasting in de Verenigde Staten" },
-  { label: "C", word: "KAPERS",        hint: "Zij die stelen in een Z-Afrikaanse stad" },
-  { label: "D", word: "TELECOM",       hint: "Internetextensie in de verte" },
-  { label: "E", word: "VANDALEN",      hint: "Vernielers van de Nederlandse spelling" },
-  { label: "F", word: "VESTIBULE",     hint: "Overgangsruimte" },
-  { label: "G", word: "FRUITVLIEG",    hint: "Appel met vleugels" },
-  { label: "H", word: "POLITIEHOND",   hint: "Woefje met sirene" },
-  { label: "I", word: "VERMEERDEREN",  hint: "Het meisje met de parel multipliceren" },
-  { label: "J", word: "WAARDEVERLIES", hint: "Kwijtspelen van de kostprijs" },
-  { label: "K", word: "GYNAECOLOGIE",  hint: "Overnachting die zich buigt over het vrouwenlichaam" },
-  { label: "L", word: "PLANTENTUIN",   hint: "Flora in Meise" },
-  { label: "M", word: "ONTAARDING",    hint: "Verwijdering van grond" },
-  { label: "N", word: "BYZITTERS",     hint: "Copiloten van een bestuiver" },
-  { label: "O", word: "AMPUTEER",      hint: "Afgezet pek" },
-  { label: "P", word: "ACTIVIA",       hint: "Yoghurt waar je energie van krijgt" },
-  { label: "Q", word: "ALGORE",        hint: "Democratische milieuactivist" },
-  { label: "R", word: "STELT",         hint: "Somt wandelstok op" },
-  { label: "S", word: "TNT",           hint: "ACDC's dynamiet" },
+  { label: "A", word: "TEC",           hint: "Lijmt de Waalse Lijn",                              shown: [2] },
+  { label: "B", word: "TAXUS",         hint: "Belasting in de Verenigde Staten",                  shown: [0, 4] },
+  { label: "C", word: "KAPERS",        hint: "Zij die stelen in een Z-Afrikaanse stad",           shown: [0, 3] },
+  { label: "D", word: "TELECOM",       hint: "Internetextensie in de verte",                      shown: [1, 2, 6] },
+  { label: "E", word: "VANDALEN",      hint: "Vernielers van de Nederlandse spelling",            shown: [0, 3, 5] },
+  { label: "F", word: "VESTIBULE",     hint: "Overgangsruimte",                                   shown: [0, 1, 6, 8] },
+  { label: "G", word: "FRUITVLIEG",    hint: "Appel met vleugels",                                shown: [0, 2, 6, 8] },
+  { label: "H", word: "POLITIEHOND",   hint: "Woefje met sirene",                                 shown: [0, 2, 3, 7, 9] },
+  { label: "I", word: "VERMEERDEREN",  hint: "Het meisje met de parel multipliceren",             shown: [0, 2, 4, 8, 9] },
+  { label: "J", word: "WAARDEVERLIES", hint: "Kwijtspelen van de kostprijs",                      shown: [1, 3, 4, 7, 10, 11] },
+  { label: "K", word: "GYNAECOLOGIE",  hint: "Overnachting die zich buigt over het vrouwenlichaam", shown: [0, 3, 5, 8, 10] },
+  { label: "L", word: "PLANTENTUIN",   hint: "Flora in Meise",                                    shown: [1, 2, 3, 8, 9] },
+  { label: "M", word: "ONTAARDING",    hint: "Verwijdering van grond",                            shown: [2, 4, 7, 9] },
+  { label: "N", word: "BYZITTERS",     hint: "Copiloten van een bestuiver",                       shown: [0, 3, 5, 8] },
+  { label: "O", word: "AMPUTEER",      hint: "Afgezet pek",                                       shown: [0, 4, 5] },
+  { label: "P", word: "ACTIVIA",       hint: "Yoghurt waar je energie van krijgt",                shown: [0, 2, 4] },
+  { label: "Q", word: "ALGORE",        hint: "Democratische milieuactivist",                      shown: [1, 3] },
+  { label: "R", word: "STELT",         hint: "Somt wandelstok op",                                shown: [1, 3] },
+  { label: "S", word: "TNT",           hint: "ACDC's dynamiet",                                   shown: [0] },
 ];
 
 const SOLUTION = "EXPEDITIEVOERTUIGEN";
@@ -288,14 +290,17 @@ function buildGrid() {
         div.className = 'cell label';
         div.textContent = row.label;
       } else if (col >= row.startCol && col < row.startCol + row.word.length) {
-        const letter = row.word[col - row.startCol];
+        const wordIdx = col - row.startCol;
+        const letter = row.word[wordIdx];
         const num = letterToNum[letter];
         const isSolution = col === SOLUTION_COL;
         div.className = 'cell input' + (isSolution ? ' solution' : '');
-        const numSpan = document.createElement('span');
-        numSpan.className = 'num';
-        numSpan.textContent = num;
-        div.appendChild(numSpan);
+        if (row.shown && row.shown.includes(wordIdx)) {
+          const numSpan = document.createElement('span');
+          numSpan.className = 'num';
+          numSpan.textContent = num;
+          div.appendChild(numSpan);
+        }
         const input = document.createElement('input');
         input.type = 'text';
         input.maxLength = 1;
