@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Yannicks Crypto</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #faf7ea;
+    margin: 0;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #1a1a1a;
+  }
+  header h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: normal;
+    font-size: 32px;
+    margin: 0 0 6px;
+    letter-spacing: 0.02em;
+  }
+  header p { margin: 0; color: #555; font-style: italic; font-size: 15px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr);
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border: 2px solid #1a1a1a;
+  }
+  .cell {
+    aspect-ratio: 1;
+    position: relative;
+    border: 1px solid #c4c4c4;
+    margin: -1px 0 0 -1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+  }
+  .cell.label {
+    background: #1a1a1a;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    border-color: #1a1a1a;
+  }
+  .cell.empty {
+    background: transparent;
+    border: none;
+  }
+  .cell.solution { background: #f3ed63; }
+  .cell .num {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 9px;
+    color: #707070;
+    pointer-events: none;
+    line-height: 1;
+  }
+  .cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: clamp(15px, 2.4vw, 20px);
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    outline: none;
+    padding: 0;
+    font-family: inherit;
+  }
+  .cell input:focus { background: #fff8b3; }
+  .cell.solution input:focus { background: #ebe23a; }
+
+  .hints-panel {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+  }
+  .hint-item {
+    display: flex;
+    gap: 14px;
+    padding: 11px 16px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+  }
+  .hint-item:last-child { border-bottom: none; }
+  .hint-letter {
+    background: #1a1a1a;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .hint-text { font-size: 15px; line-height: 1.4; }
+
+  .controls {
+    margin-top: 22px;
+    text-align: center;
+  }
+  button {
+    background: #1a1a1a;
+    color: white;
+    border: none;
+    padding: 11px 20px;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    margin: 4px;
+    letter-spacing: 0.02em;
+    border-radius: 1px;
+  }
+  button.ghost {
+    background: transparent;
+    color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+  }
+  button:hover { opacity: 0.85; }
+
+  .message {
+    margin-top: 14px;
+    min-height: 26px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .message.success { color: #2a7c3e; }
+  .message.error { color: #b03030; }
+
+  .solution-section {
+    margin-top: 30px;
+    padding: 22px 20px;
+    background: white;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  .solution-section h2 {
+    margin: 0 0 14px;
+    font-family: Georgia, serif;
+    font-weight: normal;
+    font-size: 22px;
+  }
+  .solution-section .hint-text {
+    color: #666;
+    font-size: 14px;
+    margin-top: 12px;
+    font-style: italic;
+  }
+  .solution-grid {
+    display: grid;
+    grid-template-columns: repeat(19, 1fr);
+    max-width: 600px;
+    margin: 0 auto;
+    border: 2px solid #1a1a1a;
+  }
+  .sol-cell {
+    aspect-ratio: 1;
+    background: #f3ed63;
+    border: 1px solid #c4c4c4;
+    margin: -1px 0 0 -1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: clamp(13px, 1.9vw, 18px);
+    text-transform: uppercase;
+  }
+
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Yannicks Crypto</h1>
+  </header>
+
+  <div class="layout">
+    <div>
+      <div class="grid" id="grid"></div>
+
+      <div class="controls">
+        <button id="check-btn">Controleer mijn oplossing</button>
+        <button id="reset-btn" class="ghost">Wis alles</button>
+        <button id="reveal-btn" class="ghost">Toon oplossing</button>
+        <div class="message" id="message"></div>
+      </div>
+
+      <div class="solution-section">
+        <h2>Oplossing</h2>
+        <div class="solution-grid" id="solution-grid"></div>
+        <div class="hint-text">De letters in de gele kolom vormen samen het slotwoord.</div>
+      </div>
+    </div>
+
+    <div class="hints-panel" id="hints-panel"></div>
+  </div>
+
+  <footer>Naar het origineel van Karel Vereertbrugghen.</footer>
+</div>
+
+<script>
+const puzzle = [
+  { label: "A", word: "TEC",           hint: "Lijmt de Waalse Lijn" },
+  { label: "B", word: "TAXUS",         hint: "Belasting in de Verenigde Staten" },
+  { label: "C", word: "KAPERS",        hint: "Zij die stelen in een Z-Afrikaanse stad" },
+  { label: "D", word: "TELECOM",       hint: "Internetextensie in de verte" },
+  { label: "E", word: "VANDALEN",      hint: "Vernielers van de Nederlandse spelling" },
+  { label: "F", word: "VESTIBULE",     hint: "Overgangsruimte" },
+  { label: "G", word: "FRUITVLIEG",    hint: "Appel met vleugels" },
+  { label: "H", word: "POLITIEHOND",   hint: "Woefje met sirene" },
+  { label: "I", word: "VERMEERDEREN",  hint: "Het meisje met de parel multipliceren" },
+  { label: "J", word: "WAARDEVERLIES", hint: "Kwijtspelen van de kostprijs" },
+  { label: "K", word: "GYNAECOLOGIE",  hint: "Overnachting die zich buigt over het vrouwenlichaam" },
+  { label: "L", word: "PLANTENTUIN",   hint: "Flora in Meise" },
+  { label: "M", word: "ONTAARDING",    hint: "Verwijdering van grond" },
+  { label: "N", word: "BYZITTERS",     hint: "Copiloten van een bestuiver" },
+  { label: "O", word: "AMPUTEER",      hint: "Afgezet pek" },
+  { label: "P", word: "ACTIVIA",       hint: "Yoghurt waar je energie van krijgt" },
+  { label: "Q", word: "ALGORE",        hint: "Democratische milieuactivist" },
+  { label: "R", word: "STELT",         hint: "Somt wandelstok op" },
+  { label: "S", word: "TNT",           hint: "ACDC's dynamiet" },
+];
+
+const SOLUTION = "EXPEDITIEVOERTUIGEN";
+const SOLUTION_COL = 7;
+const TOTAL_COLS = 14;
+
+puzzle.forEach((row, i) => {
+  const idx = row.word.indexOf(SOLUTION[i]);
+  if (idx === -1) console.error("Solution letter not found:", SOLUTION[i], "in", row.word);
+  row.startCol = SOLUTION_COL - idx;
+});
+
+const letterToNum = {};
+let nextNum = 1;
+puzzle.forEach(row => {
+  for (const ch of row.word) {
+    if (!letterToNum[ch]) letterToNum[ch] = nextNum++;
+  }
+});
+
+const userMap = {};
+
+function buildGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  puzzle.forEach((row) => {
+    for (let col = 0; col < TOTAL_COLS; col++) {
+      const div = document.createElement('div');
+      if (col === 0) {
+        div.className = 'cell label';
+        div.textContent = row.label;
+      } else if (col >= row.startCol && col < row.startCol + row.word.length) {
+        const letter = row.word[col - row.startCol];
+        const num = letterToNum[letter];
+        const isSolution = col === SOLUTION_COL;
+        div.className = 'cell input' + (isSolution ? ' solution' : '');
+        const numSpan = document.createElement('span');
+        numSpan.className = 'num';
+        numSpan.textContent = num;
+        div.appendChild(numSpan);
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.maxLength = 1;
+        input.dataset.num = num;
+        input.autocomplete = 'off';
+        input.autocapitalize = 'characters';
+        input.spellcheck = false;
+        input.addEventListener('input', handleInput);
+        input.addEventListener('focus', e => e.target.select());
+        input.addEventListener('keydown', handleKeydown);
+        div.appendChild(input);
+      } else {
+        div.className = 'cell empty';
+      }
+      grid.appendChild(div);
+    }
+  });
+}
+
+function handleInput(e) {
+  const raw = e.target.value;
+  const val = raw.toUpperCase();
+  const num = e.target.dataset.num;
+  if (/^[A-Z]$/.test(val)) {
+    userMap[num] = val;
+    syncCipher();
+    moveToNext(e.target);
+  } else if (val === '') {
+    delete userMap[num];
+    syncCipher();
+  } else {
+    e.target.value = userMap[num] || '';
+  }
+}
+
+function handleKeydown(e) {
+  if (e.key === 'Backspace' && !e.target.value) {
+    moveToPrev(e.target);
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight') {
+    moveToNext(e.target); e.preventDefault();
+  } else if (e.key === 'ArrowLeft') {
+    moveToPrev(e.target); e.preventDefault();
+  } else if (e.key === 'ArrowDown') {
+    moveByRows(e.target, 1); e.preventDefault();
+  } else if (e.key === 'ArrowUp') {
+    moveByRows(e.target, -1); e.preventDefault();
+  }
+}
+
+function syncCipher() {
+  document.querySelectorAll('.cell input').forEach(inp => {
+    const num = inp.dataset.num;
+    inp.value = userMap[num] || '';
+  });
+  updateSolution();
+}
+
+function allInputs() {
+  return Array.from(document.querySelectorAll('.cell input'));
+}
+function moveToNext(el) {
+  const inputs = allInputs();
+  const i = inputs.indexOf(el);
+  if (i >= 0 && i < inputs.length - 1) inputs[i + 1].focus();
+}
+function moveToPrev(el) {
+  const inputs = allInputs();
+  const i = inputs.indexOf(el);
+  if (i > 0) inputs[i - 1].focus();
+}
+function moveByRows(el, dir) {
+  const inputs = allInputs();
+  const i = inputs.indexOf(el);
+  const num = el.dataset.num;
+  for (let j = i + dir; j >= 0 && j < inputs.length; j += dir) {
+    if (inputs[j] !== el) { inputs[j].focus(); return; }
+  }
+}
+
+function buildHints() {
+  const panel = document.getElementById('hints-panel');
+  panel.innerHTML = '';
+  puzzle.forEach(row => {
+    const item = document.createElement('div');
+    item.className = 'hint-item';
+    const letterDiv = document.createElement('div');
+    letterDiv.className = 'hint-letter';
+    letterDiv.textContent = row.label;
+    const textDiv = document.createElement('div');
+    textDiv.className = 'hint-text';
+    textDiv.textContent = row.hint;
+    item.appendChild(letterDiv);
+    item.appendChild(textDiv);
+    panel.appendChild(item);
+  });
+}
+
+function buildSolution() {
+  const sg = document.getElementById('solution-grid');
+  sg.innerHTML = '';
+  for (let i = 0; i < SOLUTION.length; i++) {
+    const div = document.createElement('div');
+    div.className = 'sol-cell';
+    sg.appendChild(div);
+  }
+}
+
+function updateSolution() {
+  const cells = document.querySelectorAll('.sol-cell');
+  cells.forEach((cell, i) => {
+    const letter = SOLUTION[i];
+    const num = letterToNum[letter];
+    cell.textContent = userMap[num] || '';
+  });
+}
+
+document.getElementById('check-btn').addEventListener('click', () => {
+  const msg = document.getElementById('message');
+  let filled = 0;
+  let correct = 0;
+  const total = Object.keys(letterToNum).length;
+  for (const [letter, num] of Object.entries(letterToNum)) {
+    if (userMap[num]) filled++;
+    if (userMap[num] === letter) correct++;
+  }
+  if (correct === total) {
+    msg.textContent = 'Proficiat! Je hebt de crypto gekraakt!';
+    msg.className = 'message success';
+  } else if (filled < total) {
+    msg.textContent = `Nog niet alles ingevuld — ${filled}/${total} letters geprobeerd, ${correct} juist.`;
+    msg.className = 'message error';
+  } else {
+    msg.textContent = `Nog niet helemaal — ${correct}/${total} letters juist. Blijf zoeken!`;
+    msg.className = 'message error';
+  }
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => {
+  if (confirm('Alles wissen?')) {
+    for (const k in userMap) delete userMap[k];
+    syncCipher();
+    document.getElementById('message').textContent = '';
+  }
+});
+
+document.getElementById('reveal-btn').addEventListener('click', () => {
+  if (confirm('De volledige oplossing tonen?')) {
+    for (const [letter, num] of Object.entries(letterToNum)) {
+      userMap[num] = letter;
+    }
+    syncCipher();
+    document.getElementById('message').textContent = '';
+  }
+});
+
+buildGrid();
+buildHints();
+buildSolution();
+</script>
+</body>
+</html>
