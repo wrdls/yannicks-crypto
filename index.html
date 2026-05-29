@@ -236,28 +236,29 @@
 </div>
 
 <script>
-// `shown` = word-relative indexes (0-based) whose cipher number is visible as a starter hint.
-// Pattern mirrors the original Karel puzzle's hint density.
+// `solIdx` = which occurrence of the solution letter sits in the solution column.
+// `shown`  = word-relative indexes whose cipher number is visible as a starter hint.
+//            Numbered cells share state via the cipher; unnumbered cells must be solved manually.
 const puzzle = [
-  { label: "A", word: "TEC",           hint: "Lijmt de Waalse Lijn",                              shown: [2] },
-  { label: "B", word: "TAXUS",         hint: "Belasting in de Verenigde Staten",                  shown: [0, 4] },
-  { label: "C", word: "KAPERS",        hint: "Zij die stelen in een Z-Afrikaanse stad",           shown: [0, 3] },
-  { label: "D", word: "TELECOM",       hint: "Internetextensie in de verte",                      shown: [1, 2, 6] },
-  { label: "E", word: "VANDALEN",      hint: "Vernielers van de Nederlandse spelling",            shown: [0, 3, 5] },
-  { label: "F", word: "VESTIBULE",     hint: "Overgangsruimte",                                   shown: [0, 1, 6, 8] },
-  { label: "G", word: "FRUITVLIEG",    hint: "Appel met vleugels",                                shown: [0, 2, 6, 8] },
-  { label: "H", word: "POLITIEHOND",   hint: "Woefje met sirene",                                 shown: [0, 2, 3, 7, 9] },
-  { label: "I", word: "VERMEERDEREN",  hint: "Het meisje met de parel multipliceren",             shown: [0, 2, 4, 8, 9] },
-  { label: "J", word: "WAARDEVERLIES", hint: "Kwijtspelen van de kostprijs",                      shown: [1, 3, 4, 7, 10, 11] },
-  { label: "K", word: "GYNAECOLOGIE",  hint: "Overnachting die zich buigt over het vrouwenlichaam", shown: [0, 3, 5, 8, 10] },
-  { label: "L", word: "PLANTENTUIN",   hint: "Flora in Meise",                                    shown: [1, 2, 3, 8, 9] },
-  { label: "M", word: "ONTAARDING",    hint: "Verwijdering van grond",                            shown: [2, 4, 7, 9] },
-  { label: "N", word: "BYZITTERS",     hint: "Copiloten van een bestuiver",                       shown: [0, 3, 5, 8] },
-  { label: "O", word: "AMPUTEER",      hint: "Afgezet pek",                                       shown: [0, 4, 5] },
-  { label: "P", word: "ACTIVIA",       hint: "Yoghurt waar je energie van krijgt",                shown: [0, 2, 4] },
-  { label: "Q", word: "ALGORE",        hint: "Democratische milieuactivist",                      shown: [1, 3] },
-  { label: "R", word: "STELT",         hint: "Somt wandelstok op",                                shown: [1, 3] },
-  { label: "S", word: "TNT",           hint: "ACDC's dynamiet",                                   shown: [0] },
+  { label: "A", word: "TEC",           hint: "Lijmt de Waalse Lijn",                                solIdx: 1, shown: [2] },
+  { label: "B", word: "TAXUS",         hint: "Belasting in de Verenigde Staten",                    solIdx: 2, shown: [0, 4] },
+  { label: "C", word: "KAPERS",        hint: "Zij die stelen in een Z-Afrikaanse stad",             solIdx: 2, shown: [0, 5] },
+  { label: "D", word: "TELECOM",       hint: "Internetextensie in de verte",                        solIdx: 3, shown: [1, 5] },
+  { label: "E", word: "VANDALEN",      hint: "Vernielers van de Nederlandse spelling",              solIdx: 3, shown: [0, 5, 7] },
+  { label: "F", word: "VESTIBULE",     hint: "Overgangsruimte",                                     solIdx: 4, shown: [0, 2, 7] },
+  { label: "G", word: "FRUITVLIEG",    hint: "Appel met vleugels",                                  solIdx: 4, shown: [0, 2, 7, 9] },
+  { label: "H", word: "POLITIEHOND",   hint: "Woefje met sirene",                                   solIdx: 5, shown: [0, 2, 7, 9] },
+  { label: "I", word: "VERMEERDEREN",  hint: "Het meisje met de parel multipliceren",               solIdx: 5, shown: [1, 3, 7, 10] },
+  { label: "J", word: "WAARDEVERLIES", hint: "Kwijtspelen van de kostprijs",                        solIdx: 6, shown: [0, 2, 4, 8, 10, 12] },
+  { label: "K", word: "GYNAECOLOGIE",  hint: "Overnachting die zich buigt over het vrouwenlichaam", solIdx: 6, shown: [1, 2, 4, 8, 10] },
+  { label: "L", word: "PLANTENTUIN",   hint: "Flora in Meise",                                      solIdx: 5, shown: [0, 2, 7, 9] },
+  { label: "M", word: "ONTAARDING",    hint: "Verwijdering van grond",                              solIdx: 5, shown: [0, 2, 7, 9] },
+  { label: "N", word: "BYZITTERS",     hint: "Copiloten van een bestuiver",                         solIdx: 4, shown: [0, 2, 6, 8] },
+  { label: "O", word: "AMPUTEER",      hint: "Afgezet pek",                                         solIdx: 3, shown: [0, 5, 7] },
+  { label: "P", word: "ACTIVIA",       hint: "Yoghurt waar je energie van krijgt",                  solIdx: 3, shown: [0, 5] },
+  { label: "Q", word: "ALGORE",        hint: "Democratische milieuactivist",                        solIdx: 2, shown: [0, 4] },
+  { label: "R", word: "STELT",         hint: "Somt wandelstok op",                                  solIdx: 2, shown: [0, 4] },
+  { label: "S", word: "TNT",           hint: "ACDC's dynamiet",                                     solIdx: 1, shown: [0] },
 ];
 
 const SOLUTION = "EXPEDITIEVOERTUIGEN";
@@ -265,9 +266,10 @@ const SOLUTION_COL = 7;
 const TOTAL_COLS = 14;
 
 puzzle.forEach((row, i) => {
-  const idx = row.word.indexOf(SOLUTION[i]);
-  if (idx === -1) console.error("Solution letter not found:", SOLUTION[i], "in", row.word);
-  row.startCol = SOLUTION_COL - idx;
+  if (row.word[row.solIdx] !== SOLUTION[i]) {
+    console.error("solIdx mismatch:", row.label, row.word, "expected", SOLUTION[i], "at", row.solIdx);
+  }
+  row.startCol = SOLUTION_COL - row.solIdx;
 });
 
 const letterToNum = {};
@@ -278,12 +280,13 @@ puzzle.forEach(row => {
   }
 });
 
-const userMap = {};
+// cellValues: cellId ("rowIdx-col") -> letter. Holds the state of every cell, numbered or not.
+const cellValues = {};
 
 function buildGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
-  puzzle.forEach((row) => {
+  puzzle.forEach((row, rowIdx) => {
     for (let col = 0; col < TOTAL_COLS; col++) {
       const div = document.createElement('div');
       if (col === 0) {
@@ -294,8 +297,9 @@ function buildGrid() {
         const letter = row.word[wordIdx];
         const num = letterToNum[letter];
         const isSolution = col === SOLUTION_COL;
+        const isShown = row.shown && row.shown.includes(wordIdx);
         div.className = 'cell input' + (isSolution ? ' solution' : '');
-        if (row.shown && row.shown.includes(wordIdx)) {
+        if (isShown) {
           const numSpan = document.createElement('span');
           numSpan.className = 'num';
           numSpan.textContent = num;
@@ -304,7 +308,8 @@ function buildGrid() {
         const input = document.createElement('input');
         input.type = 'text';
         input.maxLength = 1;
-        input.dataset.num = num;
+        input.dataset.cellId = `${rowIdx}-${col}`;
+        if (isShown) input.dataset.num = num;
         input.autocomplete = 'off';
         input.autocapitalize = 'characters';
         input.spellcheck = false;
@@ -320,19 +325,33 @@ function buildGrid() {
   });
 }
 
+function setLetter(input, letter) {
+  const cellId = input.dataset.cellId;
+  const num = input.dataset.num;
+  if (num != null) {
+    // Numbered cell: propagate to all other numbered cells sharing the cipher.
+    document.querySelectorAll(`input[data-num="${num}"]`).forEach(inp => {
+      const id = inp.dataset.cellId;
+      if (letter) cellValues[id] = letter; else delete cellValues[id];
+      inp.value = letter;
+    });
+  } else {
+    // Unnumbered cell: only this one cell changes.
+    if (letter) cellValues[cellId] = letter; else delete cellValues[cellId];
+    input.value = letter;
+  }
+  updateSolution();
+}
+
 function handleInput(e) {
-  const raw = e.target.value;
-  const val = raw.toUpperCase();
-  const num = e.target.dataset.num;
+  const val = e.target.value.toUpperCase();
   if (/^[A-Z]$/.test(val)) {
-    userMap[num] = val;
-    syncCipher();
+    setLetter(e.target, val);
     moveToNext(e.target);
   } else if (val === '') {
-    delete userMap[num];
-    syncCipher();
+    setLetter(e.target, '');
   } else {
-    e.target.value = userMap[num] || '';
+    e.target.value = cellValues[e.target.dataset.cellId] || '';
   }
 }
 
@@ -351,10 +370,9 @@ function handleKeydown(e) {
   }
 }
 
-function syncCipher() {
+function syncAllCells() {
   document.querySelectorAll('.cell input').forEach(inp => {
-    const num = inp.dataset.num;
-    inp.value = userMap[num] || '';
+    inp.value = cellValues[inp.dataset.cellId] || '';
   });
   updateSolution();
 }
@@ -410,49 +428,52 @@ function buildSolution() {
 }
 
 function updateSolution() {
-  const cells = document.querySelectorAll('.sol-cell');
-  cells.forEach((cell, i) => {
-    const letter = SOLUTION[i];
-    const num = letterToNum[letter];
-    cell.textContent = userMap[num] || '';
+  document.querySelectorAll('.sol-cell').forEach((cell, i) => {
+    cell.textContent = cellValues[`${i}-${SOLUTION_COL}`] || '';
   });
 }
 
 document.getElementById('check-btn').addEventListener('click', () => {
   const msg = document.getElementById('message');
-  let filled = 0;
-  let correct = 0;
-  const total = Object.keys(letterToNum).length;
-  for (const [letter, num] of Object.entries(letterToNum)) {
-    if (userMap[num]) filled++;
-    if (userMap[num] === letter) correct++;
-  }
+  let total = 0, filled = 0, correct = 0;
+  puzzle.forEach((row, rowIdx) => {
+    for (let i = 0; i < row.word.length; i++) {
+      const cellId = `${rowIdx}-${row.startCol + i}`;
+      const expected = row.word[i];
+      const actual = cellValues[cellId];
+      total++;
+      if (actual) filled++;
+      if (actual === expected) correct++;
+    }
+  });
   if (correct === total) {
     msg.textContent = 'Proficiat! Je hebt de crypto gekraakt!';
     msg.className = 'message success';
   } else if (filled < total) {
-    msg.textContent = `Nog niet alles ingevuld — ${filled}/${total} letters geprobeerd, ${correct} juist.`;
+    msg.textContent = `Nog niet alles ingevuld — ${filled}/${total} vakjes geprobeerd, ${correct} juist.`;
     msg.className = 'message error';
   } else {
-    msg.textContent = `Nog niet helemaal — ${correct}/${total} letters juist. Blijf zoeken!`;
+    msg.textContent = `Nog niet helemaal — ${correct}/${total} vakjes juist. Blijf zoeken!`;
     msg.className = 'message error';
   }
 });
 
 document.getElementById('reset-btn').addEventListener('click', () => {
   if (confirm('Alles wissen?')) {
-    for (const k in userMap) delete userMap[k];
-    syncCipher();
+    for (const k in cellValues) delete cellValues[k];
+    syncAllCells();
     document.getElementById('message').textContent = '';
   }
 });
 
 document.getElementById('reveal-btn').addEventListener('click', () => {
   if (confirm('De volledige oplossing tonen?')) {
-    for (const [letter, num] of Object.entries(letterToNum)) {
-      userMap[num] = letter;
-    }
-    syncCipher();
+    puzzle.forEach((row, rowIdx) => {
+      for (let i = 0; i < row.word.length; i++) {
+        cellValues[`${rowIdx}-${row.startCol + i}`] = row.word[i];
+      }
+    });
+    syncAllCells();
     document.getElementById('message').textContent = '';
   }
 });
